@@ -1,5 +1,6 @@
 import { initTRPC } from "@trpc/server";
 import type { H3Event } from "h3";
+import superjson from "superjson";
 
 export const createTRPCContext = async (event: H3Event) => {
   return {
@@ -10,7 +11,9 @@ export const createTRPCContext = async (event: H3Event) => {
 };
 
 type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;
-const t = initTRPC.context<TRPCContext>().create({});
+const t = initTRPC.context<TRPCContext>().create({
+  transformer: superjson,
+});
 
 // Base router and procedure helpers
 export const createTRPCRouter = t.router;

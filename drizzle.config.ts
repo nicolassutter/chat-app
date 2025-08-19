@@ -10,6 +10,6 @@ export default defineConfig({
   schema: "./server/utils/db/schema.ts",
   dialect: "sqlite",
   dbCredentials: {
-    url: process.env.DB_FILE_NAME!,
+    url: process.env.NUXT_DB_FILE_NAME!,
   },
 });
