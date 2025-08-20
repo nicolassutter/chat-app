@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAsyncState } from "@vueuse/core";
 import z from "zod";
 
 const schema = z.object({
@@ -13,24 +14,34 @@ const state = reactive({
   name: "",
 });
 
-async function submit() {
-  await signUp.email({
-    email: state.email,
-    password: state.password,
-    name: state.name,
-  });
-  await navigateTo({
-    path: "/",
-  });
-}
+const { isLoading, execute: handleSignup } = useAsyncState(
+  async () => {
+    await signUp.email({
+      email: state.email,
+      password: state.password,
+      name: state.name,
+    });
+    await navigateTo({
+      path: "/",
+    });
+  },
+  null,
+  {
+    immediate: false,
+  },
+);
 </script>
 
 <template>
   <UForm
     :schema
     :state
-    class="flex flex-col gap-4 mx-auto max-w-lg w-full"
-    @submit.prevent="submit"
+    class="flex flex-col gap-4 mx-auto max-w-lg w-full p-4"
+    @submit.prevent="
+      () => {
+        handleSignup();
+      }
+    "
   >
     <UFormField label="Name" required name="name">
       <UInput v-model="state.name" type="text" class="w-full" />
@@ -44,6 +55,8 @@ async function submit() {
       <UInput v-model="state.password" type="password" class="w-full" />
     </UFormField>
 
-    <UButton type="submit" class="justify-center">Sign Up</UButton>
+    <UButton type="submit" class="justify-center" :loading="isLoading"
+      >Sign Up</UButton
+    >
   </UForm>
 </template>

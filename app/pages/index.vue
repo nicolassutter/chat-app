@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAsyncState } from "@vueuse/core";
 import z from "zod";
 
 const route = useRoute();
@@ -76,6 +77,17 @@ async function createRoom() {
     });
   }
 }
+
+const { isLoading: signOutLoading, execute: handleSignOut } = useAsyncState(
+  async () => {
+    await signOut();
+    navigateTo({ path: "/login" });
+  },
+  null,
+  {
+    immediate: false,
+  },
+);
 
 function reset() {
   roomId.value = undefined;
@@ -160,5 +172,19 @@ function reset() {
         />
       </div>
     </template>
+
+    <UButton
+      icon="i-lucide:log-out"
+      variant="ghost"
+      class="mt-4"
+      :loading="signOutLoading"
+      @click="
+        () => {
+          handleSignOut();
+        }
+      "
+    >
+      Sign out
+    </UButton>
   </main>
 </template>

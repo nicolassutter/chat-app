@@ -29,7 +29,7 @@ const formatTime = (date: Date) => {
       <div
         v-if="showHeader"
         :class="[
-          'flex items-center gap-2 text-xs px-3',
+          'flex items-center gap-2 text-xs',
           { 'justify-end flex-row-reverse': isOwnMessage },
         ]"
       >
