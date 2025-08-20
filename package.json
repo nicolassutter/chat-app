@@ -16,7 +16,6 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@better-auth/cli": "^1.3.7",
     "@iconify-json/lucide": "^1.2.63",
     "@libsql/client": "^0.15.12",
     "@nuxt/eslint": "1.9.0",
