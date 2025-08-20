@@ -10,4 +10,5 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  secret: process.env.NUXT_BETTER_AUTH_SECRET,
 });
