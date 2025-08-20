@@ -68,7 +68,12 @@ async function createRoom() {
     });
     state.roomName = "";
     refreshRooms();
-    roomId.value = newRoom?.id;
+    roomId.value = newRoom.id;
+    toast.add({
+      title: "Room created",
+      description: `Room "${newRoom.name}" created successfully!`,
+      color: "success",
+    });
   } catch (_error) {
     toast.add({
       title: "Error creating room",

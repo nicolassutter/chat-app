@@ -120,6 +120,13 @@ export const messagesRouter = createTRPCRouter({
           })
           .returning();
 
+        if (!insertedRoom) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to create room",
+          });
+        }
+
         return insertedRoom;
       } catch (error) {
         console.error("Error creating room:", error);
