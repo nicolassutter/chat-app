@@ -11,6 +11,7 @@
 - tRPC for type-safe API calls between the frontend and backend
 
 ## Features
+
 - User registration and login
 - Real-time chat with web sockets
 - Create rooms
@@ -29,7 +30,7 @@ I chose Bun as the runtime and package manager, so Bun needs to be installed.
 1. Clone the repo
 2. Install dependencies with `bun install`
 3. Start the dev server with `bun run dev`
-    - A dev.db file will be created in the root of the project
+   - A dev.db file will be created in the root of the project
 4. Visit `http://localhost:3000/signup` in your browser and create a user
 5. You will be redirected to the home page where you can create a room
    - You can also visit `http://localhost:3000/login` to log in with an existing user
