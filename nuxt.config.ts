@@ -9,7 +9,9 @@ export default defineNuxtConfig({
     transpile: ["trpc-nuxt"],
   },
   runtimeConfig: {
-    // DB_FILE_NAME: process.env.DB_FILE_NAME,
+    public: {
+      LAST_MESSAGES_LIMIT: 10,
+    },
   },
   nitro: {
     experimental: {

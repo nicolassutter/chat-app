@@ -10,19 +10,39 @@ interface UseRealtimeChatProps {
 export type ChatMessage = AppRouterOutput["messages"]["send"]["message"];
 
 export function useRealtimeChat({ roomId }: UseRealtimeChatProps) {
+  const peers = ref<{ id: string; name: string }[]>([]);
+
   const { open, send, close, status } = useWebSocket("/api/ws/messages", {
     immediate: false,
     async onMessage(_ws, event) {
       const msg = event.data;
 
       try {
+        console.log("Received WS message:", msg);
         const data = superjson.parse(msg) as WsMessage;
 
         if (data.type === "newMessage") {
           messages.value.push(data.message);
         }
+
+        if (data.type === "peers_update") {
+          peers.value = data.peers;
+        }
+
+        if (data.type === "peer_left") {
+          peers.value = peers.value.filter((p) => p.id !== data.peer.id);
+        }
+
+        if (data.type === "kicked") {
+          alert("You have been kicked from the room");
+
+          navigateTo({
+            path: "/",
+            query: {},
+          });
+        }
       } catch (e) {
-        console.error("Failed to parse message:", e);
+        alert("Failed to handle ws event");
       }
     },
   });
@@ -41,7 +61,7 @@ export function useRealtimeChat({ roomId }: UseRealtimeChatProps) {
   const { $trpc } = useNuxtApp();
   const messages = ref<ChatMessage[]>([]);
 
-  const sendMessage = async (content: string) => {
+  async function sendMessage(content: string) {
     const { message } = await $trpc.messages.send.mutate({
       content,
       roomId,
@@ -54,12 +74,22 @@ export function useRealtimeChat({ roomId }: UseRealtimeChatProps) {
         roomId,
       } satisfies WsMessage),
     );
-  };
+  }
+
+  function kickUser(userId: string) {
+    send(
+      superjson.stringify({
+        type: "kickUser",
+        userId,
+        roomId,
+      } satisfies WsMessage),
+    );
+  }
 
   onUnmounted(() => {
     close();
   });
 
   const isConnected = computed(() => status.value === "OPEN");
-  return { messages, sendMessage, isConnected };
+  return { messages, sendMessage, isConnected, peers, kickUser };
 }

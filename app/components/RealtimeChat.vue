@@ -3,6 +3,7 @@ const props = defineProps<{
   roomId: number;
   username: string;
   messages: ChatMessage[];
+  isAdmin: boolean;
 }>();
 
 // Reactive state
@@ -15,9 +16,13 @@ const {
   messages: realtimeMessages,
   sendMessage,
   isConnected,
+  peers,
+  kickUser,
 } = useRealtimeChat({
   roomId: props.roomId,
 });
+
+const user = useUser();
 
 // Computed properties
 const allMessages = computed(() => {
@@ -60,8 +65,32 @@ onMounted(() => {
   <div
     class="flex flex-col h-full w-full bg-background text-foreground antialiased"
   >
+    <div class="flex items-center gap-2">
+      <p class="font-semibold">Currently in the room:</p>
+
+      <ul class="flex items-center gap-2 ml-2">
+        <li v-for="peer in peers" :key="peer.id">
+          <UBadge class="flex items-center">
+            {{ peer.name }}
+            <button
+              v-if="isAdmin && peer.id !== user?.id"
+              title="Kick user"
+              class="flex cursor-pointer"
+              @click="
+                () => {
+                  kickUser(peer.id);
+                }
+              "
+            >
+              <UIcon name="i-lucide:trash" />
+            </button>
+          </UBadge>
+        </li>
+      </ul>
+    </div>
+
     <!-- Messages -->
-    <div ref="containerRef" class="flex-1 overflow-y-auto pb-4 space-y-4">
+    <div ref="containerRef" class="flex-1 overflow-y-auto pb-4 space-y-4 mt-6">
       <div
         v-if="allMessages.length === 0"
         class="text-center text-sm text-muted-foreground"

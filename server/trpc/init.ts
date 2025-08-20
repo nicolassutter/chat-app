@@ -3,10 +3,13 @@ import type { H3Event } from "h3";
 import superjson from "superjson";
 
 export const createTRPCContext = async (event: H3Event) => {
+  const runtimeConfig = useRuntimeConfig();
+
   return {
     session: await auth.api.getSession({
       headers: event.headers,
     }),
+    runtimeConfig,
   };
 };
 

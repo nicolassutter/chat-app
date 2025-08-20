@@ -2,6 +2,7 @@
 import z from "zod";
 
 const route = useRoute();
+const runtimeConfig = useRuntimeConfig();
 const roomId = computed({
   get() {
     return route.query.roomId ? Number(route.query.roomId) : undefined;
@@ -36,7 +37,7 @@ const { data: rooms, refresh: refreshRooms } = useAsyncData(
   },
 );
 
-const { data: messagesData } = useAsyncData(
+const { data: messagesData, pending: messagesPending } = useAsyncData(
   "messages",
   async () => {
     if (!roomId.value) return { messages: [] };
@@ -47,6 +48,7 @@ const { data: messagesData } = useAsyncData(
   },
   {
     watch: [roomId],
+    immediate: roomId.value !== undefined,
   },
 );
 
@@ -83,7 +85,7 @@ function reset() {
         Choose a room to connect to or create a new one
       </h1>
 
-      <UFormField label="Select an existing room">
+      <UFormField v-if="rooms?.rooms.length" label="Select an existing room">
         <USelect
           id="room-select"
           v-model="roomId"
@@ -98,6 +100,7 @@ function reset() {
           label-key="label"
         />
       </UFormField>
+      <p v-else>No rooms available. Please create a new room.</p>
 
       <UForm :schema :state @submit.prevent="createRoom" class="grid gap-4">
         <UFormField label="New room name" required name="roomName">
@@ -112,7 +115,7 @@ function reset() {
       <UButton
         variant="ghost"
         icon="i-lucide:arrow-left"
-        class="mb-4"
+        class="mb-4 cursor-pointer"
         @click="reset"
       >
         Go back
@@ -122,11 +125,34 @@ function reset() {
         Connected to room: {{ currentRoom?.name }}
       </h1>
 
-      <RealtimeChat
-        :room-id
-        :username="user.name"
-        :messages="messagesData?.messages ?? []"
-      />
+      <UAlert color="neutral" variant="soft" class="mb-4">
+        <template #description>
+          You are seeing the last
+          <span class="font-bold"
+            >{{ runtimeConfig.public.LAST_MESSAGES_LIMIT }} messages</span
+          >
+          and every new one.
+        </template>
+      </UAlert>
+
+      <div>
+        <p v-if="messagesPending" class="flex items-center gap-2">
+          Loading messages
+          <UIcon
+            aria-hidden="true"
+            name="i-lucide:loader-circle"
+            class="animate-spin"
+          />
+        </p>
+
+        <RealtimeChat
+          v-else
+          :room-id
+          :username="user.name"
+          :messages="messagesData?.messages ?? []"
+          :is-admin="user.id === currentRoom?.ownerId"
+        />
+      </div>
     </template>
   </main>
 </template>

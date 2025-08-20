@@ -48,7 +48,7 @@ export const messagesRouter = createTRPCRouter({
 
   getMessages: protectedProcedure
     .input(z.object({ roomId: z.number().min(1, "Room ID is required") }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx: { runtimeConfig } }) => {
       try {
         const { roomId } = input;
 
@@ -58,7 +58,7 @@ export const messagesRouter = createTRPCRouter({
           .innerJoin(user, eq(chatMessages.userId, user.id))
           .where(eq(chatMessages.roomId, roomId))
           .orderBy(asc(chatMessages.createdAt))
-          .limit(10);
+          .limit(runtimeConfig.public.LAST_MESSAGES_LIMIT);
 
         const messages = data.map(({ chat_messages: message, user }) => ({
           ...message,
