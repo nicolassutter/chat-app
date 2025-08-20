@@ -33,7 +33,7 @@ const allMessages = computed(() => {
       index === self.findIndex((m) => m.id === message.id),
   );
   // Sort by creation date
-  return uniqueMessages.sort((a, b) => a.createdAt > b.createdAt);
+  return uniqueMessages.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
 });
 
 // Methods

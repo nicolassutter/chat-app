@@ -1,17 +1,15 @@
+import superjson from "superjson";
 import { useWebSocket } from "@vueuse/core";
 import type { WsMessage } from "~~/server/api/ws/messages";
-import type { AppRouterOutput } from "~~/server/trpc/routers";
-import superjson from "superjson";
+import type { ChatMessage } from "~~/server/trpc/routers/messages";
 
-interface UseRealtimeChatProps {
-  roomId: number;
-}
+export type { ChatMessage };
 
-export type ChatMessage = AppRouterOutput["messages"]["send"]["message"];
-
-export function useRealtimeChat({ roomId }: UseRealtimeChatProps) {
+export function useRealtimeChat({ roomId }: { roomId: number }) {
   const peers = ref<{ id: string; name: string }[]>([]);
   const toast = useToast();
+  const { $trpc } = useNuxtApp();
+  const messages = ref<ChatMessage[]>([]);
 
   const { open, send, close, status } = useWebSocket("/api/ws/messages", {
     immediate: false,
@@ -23,7 +21,11 @@ export function useRealtimeChat({ roomId }: UseRealtimeChatProps) {
         const data = superjson.parse(msg) as WsMessage;
 
         if (data.type === "newMessage") {
-          messages.value.push(data.message);
+          messages.value.push({
+            ...data.message,
+            roomId,
+            userId: data.message.user.id,
+          });
         }
 
         if (data.type === "peers_update") {
@@ -67,15 +69,14 @@ export function useRealtimeChat({ roomId }: UseRealtimeChatProps) {
     subscribeToRoom(roomId);
   });
 
-  const { $trpc } = useNuxtApp();
-  const messages = ref<ChatMessage[]>([]);
-
   async function sendMessage(content: string) {
     const { message } = await $trpc.messages.send.mutate({
       content,
       roomId,
     });
-    messages.value = [...messages.value, message];
+
+    messages.value.push(message);
+
     send(
       superjson.stringify({
         type: "newMessage",

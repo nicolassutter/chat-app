@@ -2,7 +2,14 @@ import { createTRPCRouter, protectedProcedure } from "../init";
 import z from "zod";
 import { chatMessages, rooms } from "../../utils/db/schema";
 import { TRPCError } from "@trpc/server";
-import { asc, eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
+
+export type ChatMessage = typeof chatMessages.$inferSelect & {
+  user: {
+    id: string;
+    name: string;
+  };
+};
 
 export const messagesRouter = createTRPCRouter({
   send: protectedProcedure
@@ -23,10 +30,15 @@ export const messagesRouter = createTRPCRouter({
           userId: user.id,
         };
 
-        const [inserted] = await db
-          .insert(chatMessages)
-          .values(message)
-          .returning();
+        const rows = await db.insert(chatMessages).values(message).returning();
+        const inserted = rows[0];
+
+        if (!inserted) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to insert message",
+          });
+        }
 
         return {
           message: {
@@ -36,7 +48,7 @@ export const messagesRouter = createTRPCRouter({
               id: user.id,
             },
           },
-        };
+        } satisfies { message: ChatMessage };
       } catch (error) {
         console.error("Error saving message:", error);
         throw new TRPCError({
@@ -57,16 +69,18 @@ export const messagesRouter = createTRPCRouter({
           .from(chatMessages)
           .innerJoin(user, eq(chatMessages.userId, user.id))
           .where(eq(chatMessages.roomId, roomId))
-          .orderBy(asc(chatMessages.createdAt))
+          .orderBy(desc(chatMessages.createdAt))
           .limit(runtimeConfig.public.LAST_MESSAGES_LIMIT);
 
-        const messages = data.map(({ chat_messages: message, user }) => ({
-          ...message,
-          user: {
-            id: user.id,
-            name: user.name,
-          },
-        }));
+        const messages = data.map(
+          ({ chat_messages: message, user }): ChatMessage => ({
+            ...message,
+            user: {
+              id: user.id,
+              name: user.name,
+            },
+          }),
+        );
 
         return messages;
       } catch (error) {

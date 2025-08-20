@@ -1,4 +1,3 @@
-import type { inferRouterOutputs } from "@trpc/server";
 import { createTRPCRouter } from "../init";
 import { messagesRouter } from "./messages";
 
@@ -7,4 +6,3 @@ export const appRouter = createTRPCRouter({
 });
 
 export type AppRouter = typeof appRouter;
-export type AppRouterOutput = inferRouterOutputs<AppRouter>;
