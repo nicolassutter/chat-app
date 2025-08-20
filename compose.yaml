@@ -1,0 +1,23 @@
+services:
+  chat_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chat_app
+    volumes:
+      - ./db:/db
+    env_file:
+      - .env
+    networks:
+      - proxy-network
+    labels:
+      caddy: "chat-app.hostpanda.dev"
+      caddy.reverse_proxy: "{{ upstreams 3000 }}"
+    environment:
+      - NUXT_DB_FILE_NAME=file:/db/data.db
+      - NUXT_BETTER_AUTH_SECRET=${NUXT_BETTER_AUTH_SECRET}
+      - NUXT_BETTER_AUTH_URL=${NUXT_BETTER_AUTH_URL:-http://localhost:3000}
+
+networks:
+  proxy-network:
+    external: true

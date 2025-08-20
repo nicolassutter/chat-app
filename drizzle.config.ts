@@ -3,6 +3,7 @@ import { defineConfig } from "drizzle-kit";
 
 config({
   path: "./.env.development",
+  override: false,
 });
 
 export default defineConfig({
