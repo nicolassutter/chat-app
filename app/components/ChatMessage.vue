@@ -34,7 +34,7 @@ const formatTime = (date: Date) => {
         ]"
       >
         <span class="font-medium">{{ message.user.name }}</span>
-        <span class="text-foreground/50 text-xs" v-if="message.createdAt">
+        <span v-if="message.createdAt" class="text-foreground/50 text-xs">
           {{ formatTime(message.createdAt) }}
         </span>
       </div>

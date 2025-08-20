@@ -120,7 +120,7 @@ function reset() {
       </UFormField>
       <p v-else>No rooms available. Please create a new room.</p>
 
-      <UForm :schema :state @submit.prevent="createRoom" class="grid gap-4">
+      <UForm :schema :state class="grid gap-4" @submit.prevent="createRoom">
         <UFormField label="New room name" required name="roomName">
           <UInput v-model="state.roomName" type="text" class="w-full" />
         </UFormField>
