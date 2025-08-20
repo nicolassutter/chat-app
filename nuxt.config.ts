@@ -18,4 +18,12 @@ export default defineNuxtConfig({
       websocket: true,
     },
   },
+  app: {
+    head: {
+      title: "Chat App",
+      htmlAttrs: {
+        lang: "en",
+      },
+    },
+  },
 });

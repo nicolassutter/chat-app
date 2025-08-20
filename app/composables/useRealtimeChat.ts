@@ -11,6 +11,7 @@ export type ChatMessage = AppRouterOutput["messages"]["send"]["message"];
 
 export function useRealtimeChat({ roomId }: UseRealtimeChatProps) {
   const peers = ref<{ id: string; name: string }[]>([]);
+  const toast = useToast();
 
   const { open, send, close, status } = useWebSocket("/api/ws/messages", {
     immediate: false,
@@ -34,7 +35,11 @@ export function useRealtimeChat({ roomId }: UseRealtimeChatProps) {
         }
 
         if (data.type === "kicked") {
-          alert("You have been kicked from the room");
+          toast.add({
+            title: "You have been kicked from the room",
+            description: "You will be redirected to the home page.",
+            color: "warning",
+          });
 
           navigateTo({
             path: "/",
@@ -42,7 +47,11 @@ export function useRealtimeChat({ roomId }: UseRealtimeChatProps) {
           });
         }
       } catch (e) {
-        alert("Failed to handle ws event");
+        toast.add({
+          title: "Error",
+          description: "Failed to parse WebSocket message.",
+          color: "error",
+        });
       }
     },
   });

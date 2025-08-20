@@ -56,6 +56,8 @@ const currentRoom = computed(() => {
   return rooms.value?.rooms.find((room) => room.id === roomId.value);
 });
 
+const toast = useToast();
+
 async function createRoom() {
   try {
     if (!state.roomName.trim()) return;
@@ -67,7 +69,11 @@ async function createRoom() {
     refreshRooms();
     roomId.value = newRoom?.id;
   } catch (_error) {
-    alert("Failed to create room, maybe this room already exists?");
+    toast.add({
+      title: "Error creating room",
+      description: "Failed to create room, maybe this room already exists?",
+      color: "error",
+    });
   }
 }
 
